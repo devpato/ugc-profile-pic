@@ -111,7 +111,7 @@ export default function MyPosts() {
           <div key={post.id} className="border p-4 rounded flex items-start">
             <div className="flex-shrink-0 w-[75px] h-[75px] mr-4">
             <CldImage
-              src={profilePicture || '/placeholder.svg'}
+              src={profilePicture || 'avatar'}
               alt="Profile"
               width={75}
               height={75}

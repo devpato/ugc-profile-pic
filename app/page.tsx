@@ -128,9 +128,14 @@ export default function MyProfile() {
             restore={true}
           />
         ) : (
-          <div className="w-[300px] h-[450px] bg-gray-200 flex items-center justify-center rounded">
-            No picture set
-          </div>
+          <CldImage
+          src={"avatar.png"}
+          alt="Profile"
+          crop="fill"
+          gravity="auto"
+          width={300}
+          height={450}
+        />
         )}
         <button
           onClick={openUploadWidget}
