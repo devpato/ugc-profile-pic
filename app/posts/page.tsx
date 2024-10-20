@@ -20,12 +20,13 @@ export default function MyPosts() {
   const [posts, setPosts] = useState<Post[]>([])
   const [newPost, setNewPost] = useState('')
   const [newImage, setNewImage] = useState('')
+  const [uploadError, setUploadError] = useState('')
+  const [uploadWidget, setUploadWidget] = useState<any>(null);
   const { profilePicture } = useUser()
 
   useEffect(() => {
-    let widget: any;
     if (typeof window !== 'undefined' && window.cloudinary) {
-      widget = window.cloudinary.createUploadWidget(
+      const widget = window.cloudinary.createUploadWidget(
         {
           cloudName: 'cld-demo-ugc',
           uploadPreset: 'ugc-profile-photo',
@@ -33,17 +34,43 @@ export default function MyPosts() {
           multiple: false,
           maxFiles: 1,
         },
-        (error: any, result: any) => {
+        async (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
-            setNewImage(result.info.public_id)
+            try {
+              const checkModeration = async () => {
+                const response = await fetch('/api/test', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(result.info),
+                });
+                const data = await response.json();
+                if (data.status === 'approved') {
+                  setNewImage(data.imageUrl);
+                  setUploadError('');
+                } else if (data.status === 'rejected') {
+                  setUploadError(data.message);
+                } else {
+                  // If still pending, check again after a delay
+                  setTimeout(checkModeration, 1000);
+                }
+              };
+
+              checkModeration();
+            } catch (error) {
+              console.error('Error checking moderation status:', error);
+              setUploadError('An error occurred while processing your image.');
+            }
           }
         }
       )
+      setUploadWidget(widget);
     }
 
     return () => {
-      if (widget) {
-        widget.destroy();
+      if (uploadWidget) {
+        uploadWidget.destroy();
       }
     }
   }, [])
@@ -57,26 +84,13 @@ export default function MyPosts() {
       ])
       setNewPost('')
       setNewImage('')
+      setUploadError('')
     }
   }
 
   const openUploadWidget = () => {
-    if (window.cloudinary) {
-      const widget = window.cloudinary.createUploadWidget(
-        {
-          cloudName: 'cld-demo-ugc',
-          uploadPreset: 'ugc-profile-photo',
-          sources: ['local'],
-          multiple: false,
-          maxFiles: 1,
-        },
-        (error: any, result: any) => {
-          if (!error && result && result.event === 'success') {
-            setNewImage(result.info.public_id)
-          }
-        }
-      )
-      widget.open()
+    if (uploadWidget) {
+      uploadWidget.open();
     }
   }
 
@@ -105,6 +119,7 @@ export default function MyPosts() {
             Post
           </button>
         </div>
+        {uploadError && <p className="text-red-500 mt-2">{uploadError}</p>}
       </form>
       <div className="space-y-4">
         {posts.map((post) => (

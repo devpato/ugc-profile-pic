@@ -16,36 +16,61 @@ export default function MyProfile() {
   const [birthday, setBirthday] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [isPoorQuality, setIsPoorQuality] = useState(false)
+  const [uploadWidget, setUploadWidget] = useState<any>(null);
   const { profilePicture, setProfilePicture } = useUser()
 
   useEffect(() => {
-    let widget: any;
     if (typeof window !== 'undefined' && window.cloudinary) {
-      widget = window.cloudinary.createUploadWidget(
+      const widget = window.cloudinary.createUploadWidget(
         {
           cloudName: 'cld-demo-ugc',
           uploadPreset: 'ugc-profile-photo',
           sources: ['local'],
           multiple: false,
           maxFiles: 1,
-          cropping: true,
-          croppingAspectRatio: 1,
-          showSkipCropButton: false,
         },
-        (error: any, result: any) => {
+        async (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
-            setProfilePicture(result.info.public_id)
+            try {
+              const checkModeration = async () => {
+                const response = await fetch('/api/test', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(result.info),
+                });
+                const data = await response.json();
+                if (data.status === 'approved') {
+                  setProfilePicture(data.imageUrl);
+                  setUploadError('');
+                  setIsPoorQuality(data.poorQuality);
+                } else if (data.status === 'rejected') {
+                  setUploadError(data.message);
+                } else {
+                  // If still pending, check again after a delay
+                  setTimeout(checkModeration, 1000);
+                }
+              };
+
+              checkModeration();
+            } catch (error) {
+              console.error('Error checking moderation status:', error);
+              setUploadError('An error occurred while processing your image.');
+            }
           }
         }
       )
+      setUploadWidget(widget);
     }
 
     return () => {
-      if (widget) {
-        widget.destroy();
+      if (uploadWidget) {
+        uploadWidget.destroy();
       }
     }
-  }, [setProfilePicture])
+  }, [setProfilePicture, setUploadWidget])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -53,22 +78,8 @@ export default function MyProfile() {
   }
 
   const openUploadWidget = () => {
-    if (window.cloudinary) {
-      const widget = window.cloudinary.createUploadWidget(
-        {
-          cloudName: 'cld-demo-ugc',
-          uploadPreset: 'ugc-profile-photo',
-          sources: ['local'],
-          multiple: false,
-          maxFiles: 1
-        },
-        (error: any, result: any) => {
-          if (!error && result && result.event === 'success') {
-            setProfilePicture(result.info.public_id)
-          }
-        }
-      )
-      widget.open()
+    if (uploadWidget) {
+      uploadWidget.open();
     }
   }
 
@@ -124,8 +135,8 @@ export default function MyProfile() {
             gravity="face"
             width={300}
             height={450}
-            enhance={true}
-            restore={true}
+            enhance={isPoorQuality && true}
+            restore={isPoorQuality && true}
           />
         ) : (
           <CldImage

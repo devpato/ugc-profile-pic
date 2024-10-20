@@ -7,6 +7,7 @@ export async function POST(request: Request) {
 
   const data = await request.json()
   
+
   // Check if this is a webhook from Cloudinary
   if (data.notification_type === 'moderation' || data.notification_type === 'moderation_summary') {
     const { moderation_status, moderation_kind, asset_id } = data
