@@ -1,6 +1,7 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
+import { UserProvider } from './context/UserContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,13 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <nav className="bg-gray-800 text-white p-4">
-          <ul className="flex space-x-4">
-            <li><a href="/" className="hover:text-gray-300">My Profile</a></li>
-            <li><a href="/posts" className="hover:text-gray-300">My Posts</a></li>
-          </ul>
-        </nav>
-        {children}
+        <UserProvider>
+          <nav className="bg-gray-800 text-white p-4">
+            <ul className="flex space-x-4">
+              <li><a href="/" className="hover:text-gray-300">My Profile</a></li>
+              <li><a href="/posts" className="hover:text-gray-300">My Posts</a></li>
+            </ul>
+          </nav>
+          {children}
+        </UserProvider>
         <Script src="https://upload-widget.cloudinary.com/global/all.js" strategy="beforeInteractive" />
       </body>
     </html>

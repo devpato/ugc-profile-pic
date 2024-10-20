@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { CldImage } from 'next-cloudinary';
+import { useUser } from '../context/UserContext'
 
 interface Post {
   id: number
@@ -19,6 +20,7 @@ export default function MyPosts() {
   const [posts, setPosts] = useState<Post[]>([])
   const [newPost, setNewPost] = useState('')
   const [newImage, setNewImage] = useState('')
+  const { profilePicture } = useUser()
 
   useEffect(() => {
     let widget: any;
@@ -33,7 +35,7 @@ export default function MyPosts() {
         },
         (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
-            setNewImage(result.info.secure_url)
+            setNewImage(result.info.public_id)
           }
         }
       )
@@ -70,7 +72,7 @@ export default function MyPosts() {
         },
         (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
-            setNewImage(result.info.secure_url)
+            setNewImage(result.info.public_id)
           }
         }
       )
@@ -89,7 +91,7 @@ export default function MyPosts() {
           className="w-full p-2 border rounded"
         />
         {newImage && (
-          <Image src={newImage} alt="New post" width={200} height={200} className="rounded" />
+          <CldImage src={newImage} alt="New post" width={200} height={200} crop="auto" className="rounded" />
         )}
         <div>
           <button
@@ -106,19 +108,21 @@ export default function MyPosts() {
       </form>
       <div className="space-y-4">
         {posts.map((post) => (
-          <div key={post.id} className="border p-4 rounded flex">
-            <Image
-              src={post.image || '/placeholder.svg'}
+          <div key={post.id} className="border p-4 rounded flex items-start">
+            <div className="flex-shrink-0 w-[75px] h-[75px] mr-4">
+            <CldImage
+              src={profilePicture || '/placeholder.svg'}
               alt="Profile"
               width={75}
               height={75}
-              className="rounded-full mr-4"
-              style={{ transform: 'ar_1,c_auto,h_75/r_max/co_pink,e_outline' }}
+              rawTransformations={['ar_1,c_fill,g_face,h_75', 'r_max', 'co_pink,e_outline']}
+
             />
+            </div>
             <div>
               <p>{post.content}</p>
               {post.image && (
-                <Image src={post.image} alt="Post" width={200} height={200} className="mt-2 rounded" />
+                <CldImage src={post.image} alt="Post" width={200} height={200} crop="auto" className="mt-2 rounded" />
               )}
             </div>
           </div>

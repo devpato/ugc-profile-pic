@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { CldImage } from 'next-cloudinary';
+import { useUser } from './context/UserContext'
 
 declare global {
   interface Window {
@@ -13,9 +14,9 @@ export default function MyProfile() {
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
   const [birthday, setBirthday] = useState('')
-  const [profilePicture, setProfilePicture] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const { profilePicture, setProfilePicture } = useUser()
 
   useEffect(() => {
     let widget: any;
@@ -33,7 +34,7 @@ export default function MyProfile() {
         },
         (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
-            setProfilePicture(result.info.secure_url)
+            setProfilePicture(result.info.public_id)
           }
         }
       )
@@ -44,7 +45,7 @@ export default function MyProfile() {
         widget.destroy();
       }
     }
-  }, [])
+  }, [setProfilePicture])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,14 +60,11 @@ export default function MyProfile() {
           uploadPreset: 'ugc-profile-photo',
           sources: ['local'],
           multiple: false,
-          maxFiles: 1,
-          cropping: true,
-          croppingAspectRatio: 1,
-          showSkipCropButton: false,
+          maxFiles: 1
         },
         (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
-            setProfilePicture(result.info.secure_url)
+            setProfilePicture(result.info.public_id)
           }
         }
       )
@@ -119,12 +117,15 @@ export default function MyProfile() {
       <div className="mt-4">
         <h2 className="text-xl font-bold mb-2">Profile Picture</h2>
         {profilePicture ? (
-          <Image
+          <CldImage
             src={profilePicture}
             alt="Profile"
+            crop="fill"
+            gravity="face"
             width={300}
             height={450}
-            className="rounded"
+            enhance={true}
+            restore={true}
           />
         ) : (
           <div className="w-[300px] h-[450px] bg-gray-200 flex items-center justify-center rounded">
