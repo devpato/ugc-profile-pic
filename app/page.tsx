@@ -29,6 +29,7 @@ export default function MyProfile() {
       const widget = window.cloudinary.createUploadWidget(
         {
           cloudName: 'cld-demo-ugc',
+          clientAllowedFormats: 'image',
           uploadPreset: 'ugc-profile-photo',
           sources: ['local'],
           multiple: false,
