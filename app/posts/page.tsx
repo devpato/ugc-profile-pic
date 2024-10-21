@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CldImage } from 'next-cloudinary';
 import { useUser } from '../context/UserContext';
-import { BallTriangle } from 'react-loader-spinner';
+import { RotatingLines } from 'react-loader-spinner';
 
 interface Post {
   id: number
@@ -110,16 +110,13 @@ export default function MyPosts() {
           className="w-full p-2 border rounded"
         />
         {loading ? (
-          <BallTriangle
-          height={200}
-          width={200}
-          radius={5}
-          color="#de5e14"
-          ariaLabel="ball-triangle-loading"
-          wrapperStyle={{}}
-          wrapperClass=""
+          <RotatingLines
           visible={true}
-          />
+          width="96"
+          strokeColor="#de5e14"
+          strokeWidth="5"
+          animationDuration="0.75"
+        />
         ):
         newImage && (
           <CldImage 

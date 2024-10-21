@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CldImage } from 'next-cloudinary';
 import { useUser } from './context/UserContext';
-import { BallTriangle } from 'react-loader-spinner';
+import { RotatingLines } from 'react-loader-spinner';
 
 declare global {
   interface Window {
@@ -133,16 +133,13 @@ export default function MyProfile() {
       <div className="mt-4">
         <h2 className="text-xl font-bold mb-2">Profile Picture</h2>
         {loading ? (
-          <BallTriangle
-          height={450}
-          width={300}
-          radius={5}
-          color="#de5e14"
-          ariaLabel="ball-triangle-loading"
-          wrapperStyle={{}}
-          wrapperClass=""
+          <RotatingLines
           visible={true}
-          />
+          width="96"
+          strokeColor="#de5e14"
+          strokeWidth="5"
+          animationDuration="0.75"
+        />
         ):
         profilePicture ? (
           <CldImage
