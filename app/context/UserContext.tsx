@@ -30,24 +30,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [birthday, setBirthday] = useState('')
   const [posts, setPosts] = useState<Post[]>([])
 
-  useEffect(() => {
-    const storedProfilePicture = localStorage.getItem('profilePicture')
-    const storedName = localStorage.getItem('name')
-    const storedLocation = localStorage.getItem('location')
-    const storedBirthday = localStorage.getItem('birthday')
-
-    if (storedProfilePicture) setProfilePicture(storedProfilePicture)
-    if (storedName) setName(storedName)
-    if (storedLocation) setLocation(storedLocation)
-    if (storedBirthday) setBirthday(storedBirthday)
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem('profilePicture', profilePicture)
-    localStorage.setItem('name', name)
-    localStorage.setItem('location', location)
-    localStorage.setItem('birthday', birthday)
-  }, [profilePicture, name, location, birthday])
 
   return (
     <UserContext.Provider value={{ 
