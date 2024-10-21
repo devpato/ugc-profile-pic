@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import { CldImage } from 'next-cloudinary';
-import { useUser } from './context/UserContext'
+import { useUser } from './context/UserContext';
+import { BallTriangle } from 'react-loader-spinner';
 
 declare global {
   interface Window {
@@ -11,14 +12,15 @@ declare global {
 }
 
 export default function MyProfile() {
-  const [name, setName] = useState('')
-  const [location, setLocation] = useState('')
-  const [birthday, setBirthday] = useState('')
-  const [isEditing, setIsEditing] = useState(false)
-  const [uploadError, setUploadError] = useState('')
-  const [isPoorQuality, setIsPoorQuality] = useState(false)
+  const [name, setName] = useState('');
+  const [location, setLocation] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [isPoorQuality, setIsPoorQuality] = useState(false);
   const [uploadWidget, setUploadWidget] = useState<any>(null);
-  const { profilePicture, setProfilePicture } = useUser()
+  const { profilePicture, setProfilePicture } = useUser();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.cloudinary) {
@@ -33,6 +35,7 @@ export default function MyProfile() {
         async (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
             try {
+              setLoading(true);
               const checkModeration = async () => {
                 const response = await fetch('/api/test', {
                   method: 'POST',
@@ -43,10 +46,12 @@ export default function MyProfile() {
                 });
                 const data = await response.json();
                 if (data.status === 'approved') {
+                  setLoading(false);
                   setProfilePicture(data.imageUrl);
                   setUploadError('');
                   setIsPoorQuality(data.poorQuality);
                 } else if (data.status === 'rejected') {
+                  setLoading(false);
                   setUploadError(data.message);
                 } else {
                   // If still pending, check again after a delay
@@ -127,7 +132,19 @@ export default function MyProfile() {
       )}
       <div className="mt-4">
         <h2 className="text-xl font-bold mb-2">Profile Picture</h2>
-        {profilePicture ? (
+        {loading ? (
+          <BallTriangle
+          height={450}
+          width={300}
+          radius={5}
+          color="#de5e14"
+          ariaLabel="ball-triangle-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+          />
+        ):
+        profilePicture ? (
           <CldImage
             src={profilePicture}
             alt="Profile"

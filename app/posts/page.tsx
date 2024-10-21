@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 import { CldImage } from 'next-cloudinary';
-import { useUser } from '../context/UserContext'
+import { useUser } from '../context/UserContext';
+import { BallTriangle } from 'react-loader-spinner';
 
 interface Post {
   id: number
@@ -17,12 +18,13 @@ declare global {
 }
 
 export default function MyPosts() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [newPost, setNewPost] = useState('')
-  const [newImage, setNewImage] = useState('')
-  const [uploadError, setUploadError] = useState('')
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState('');
+  const [newImage, setNewImage] = useState('');
+  const [uploadError, setUploadError] = useState('');
   const [uploadWidget, setUploadWidget] = useState<any>(null);
-  const { profilePicture } = useUser()
+  const { profilePicture } = useUser();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.cloudinary) {
@@ -37,6 +39,7 @@ export default function MyPosts() {
         async (error: any, result: any) => {
           if (!error && result && result.event === 'success') {
             try {
+              setLoading(true);
               const checkModeration = async () => {
                 const response = await fetch('/api/test', {
                   method: 'POST',
@@ -47,9 +50,11 @@ export default function MyPosts() {
                 });
                 const data = await response.json();
                 if (data.status === 'approved') {
+                  setLoading(false);
                   setNewImage(data.imageUrl);
                   setUploadError('');
                 } else if (data.status === 'rejected') {
+                  setLoading(false);
                   setUploadError(data.message);
                 } else {
                   // If still pending, check again after a delay
@@ -104,8 +109,26 @@ export default function MyPosts() {
           placeholder="What's on your mind?"
           className="w-full p-2 border rounded"
         />
-        {newImage && (
-          <CldImage src={newImage} alt="New post" width={200} height={200} crop="auto" className="rounded" />
+        {loading ? (
+          <BallTriangle
+          height={200}
+          width={200}
+          radius={5}
+          color="#de5e14"
+          ariaLabel="ball-triangle-loading"
+          wrapperStyle={{}}
+          wrapperClass=""
+          visible={true}
+          />
+        ):
+        newImage && (
+          <CldImage 
+             src={newImage} 
+             alt="New post" 
+             width={200} 
+             height={200} 
+             crop="auto" 
+             className="rounded" />
         )}
         <div>
           <button
