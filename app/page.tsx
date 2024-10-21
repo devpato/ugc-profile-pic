@@ -12,14 +12,16 @@ declare global {
 }
 
 export default function MyProfile() {
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [birthday, setBirthday] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [isPoorQuality, setIsPoorQuality] = useState(false);
   const [uploadWidget, setUploadWidget] = useState<any>(null);
-  const { profilePicture, setProfilePicture } = useUser();
+  const { 
+    profilePicture, setProfilePicture,
+    name, setName,
+    location, setLocation,
+    birthday, setBirthday
+  } = useUser();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

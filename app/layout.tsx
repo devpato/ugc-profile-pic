@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import { UserProvider } from './context/UserContext'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,8 +22,8 @@ export default function RootLayout({
         <UserProvider>
           <nav className="bg-gray-800 text-white p-4">
             <ul className="flex space-x-4">
-              <li><a href="/" className="hover:text-gray-300">My Profile</a></li>
-              <li><a href="/posts" className="hover:text-gray-300">My Posts</a></li>
+              <li><Link href="/" className="hover:text-gray-300">My Profile</Link></li>
+              <li><Link href="/posts" className="hover:text-gray-300">My Posts</Link></li>
             </ul>
           </nav>
           {children}

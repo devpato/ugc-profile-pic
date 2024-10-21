@@ -5,12 +5,6 @@ import { CldImage } from 'next-cloudinary';
 import { useUser } from '../context/UserContext';
 import { RotatingLines } from 'react-loader-spinner';
 
-interface Post {
-  id: number
-  content: string
-  image?: string
-}
-
 declare global {
   interface Window {
     cloudinary: any;
@@ -18,13 +12,12 @@ declare global {
 }
 
 export default function MyPosts() {
-  const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
   const [newImage, setNewImage] = useState('');
   const [uploadError, setUploadError] = useState('');
   const [uploadWidget, setUploadWidget] = useState<any>(null);
-  const { profilePicture } = useUser();
   const [loading, setLoading] = useState(false);
+  const { profilePicture, posts, setPosts } = useUser()
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.cloudinary) {
@@ -83,9 +76,9 @@ export default function MyPosts() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (newPost.trim() !== '') {
-      setPosts([
+      setPosts(prevPosts => [
         { id: Date.now(), content: newPost, image: newImage },
-        ...posts,
+        ...prevPosts,
       ])
       setNewPost('')
       setNewImage('')
